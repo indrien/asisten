@@ -1,0 +1,29 @@
+[Unit]
+Description=Telegram Assistant Bot
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/asisten
+Environment=PATH=/home/ubuntu/asisten/venv/bin
+ExecStart=/home/ubuntu/asisten/venv/bin/python main.py
+Restart=always
+RestartSec=10
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/home/ubuntu/asisten
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=telegram-bot
+
+[Install]
+WantedBy=multi-user.target

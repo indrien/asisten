@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  telegram-bot:
+    build: .
+    container_name: telegram-assistant-bot
+    restart: unless-stopped
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+      - API_ID=${API_ID}
+      - API_HASH=${API_HASH}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - MONGODB_URI=${MONGODB_URI}
+      - OWNER_ID=${OWNER_ID}
+      - BOT_NAME=${BOT_NAME}
+      - DAILY_POINTS=${DAILY_POINTS}
+      - REFERRAL_POINTS=${REFERRAL_POINTS}
+      - TIMEZONE=${TIMEZONE}
+    volumes:
+      - bot_data:/app/data
+    depends_on:
+      - mongodb
+    networks:
+      - bot-network
+
+  mongodb:
+    image: mongo:5.0
+    container_name: telegram-bot-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-secret123}
+      MONGO_INITDB_DATABASE: ${DATABASE_NAME:-telegram_assistant}
+    volumes:
+      - mongodb_data:/data/db
+    ports:
+      - "27017:27017"
+    networks:
+      - bot-network
+
+  mongo-express:
+    image: mongo-express:latest
+    container_name: telegram-bot-mongo-express
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD:-secret123}
+      ME_CONFIG_MONGODB_URL: mongodb://admin:${MONGO_PASSWORD:-secret123}@mongodb:27017/
+    depends_on:
+      - mongodb
+    networks:
+      - bot-network
+
+volumes:
+  mongodb_data:
+  bot_data:
+
+networks:
+  bot-network:
+    driver: bridge
